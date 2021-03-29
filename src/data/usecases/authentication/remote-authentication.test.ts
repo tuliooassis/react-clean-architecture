@@ -52,33 +52,15 @@ describe('RemoteAuthentication', () => {
     await expect(promise).rejects.toThrow(new InvalidCredentialsError())
   })
 
-  it('should throw UnexpectedError if HttpPostClient return 400', async () => {
+  it.each([
+    HttpStatusCode.badRequest,
+    HttpStatusCode.notFound,
+    HttpStatusCode.serverError
+  ])('should throw UnexpectedError if HttpPostClient returns %s', async (httpStatusCode: HttpStatusCode) => {
     const { sut, httpPostClientSpy } = makeSut()
 
     httpPostClientSpy.response = {
-      statusCode: HttpStatusCode.badRequest
-    }
-    const promise = sut.auth(mockAuthentication())
-
-    await expect(promise).rejects.toThrow(new UnexpectedError())
-  })
-
-  it('should throw UnexpectedError if HttpPostClient return 404', async () => {
-    const { sut, httpPostClientSpy } = makeSut()
-
-    httpPostClientSpy.response = {
-      statusCode: HttpStatusCode.notFound
-    }
-    const promise = sut.auth(mockAuthentication())
-
-    await expect(promise).rejects.toThrow(new UnexpectedError())
-  })
-
-  it('should throw UnexpectedError if HttpPostClient return 500', async () => {
-    const { sut, httpPostClientSpy } = makeSut()
-
-    httpPostClientSpy.response = {
-      statusCode: HttpStatusCode.serverError
+      statusCode: httpStatusCode
     }
     const promise = sut.auth(mockAuthentication())
 
